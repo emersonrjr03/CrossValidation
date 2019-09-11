@@ -9,14 +9,12 @@ public class KFold {
     //numero de amostras
     private int N;
 
-    private List<Element> allData;
     private Map<Integer, List<Element>> foldMap;
     private double rightGuesses;
     private double wrongGuesses;
 
     public KFold(int K){
         this.K = K;
-        allData = new ArrayList<>();
         foldMap = new HashMap<Integer, List<Element>>();
     }
 
@@ -36,42 +34,20 @@ public class KFold {
         K = k;
     }
 
-    public void addElementToData(Element e){
-        allData.add(e);
-    }
-
-    public List<Element> getAllData() {
-        return allData;
-    }
-
-    public void setAllData(List<Element> allData) {
-        this.allData = allData;
-    }
-
     public Map<Integer, List<Element>> getFoldMap() {
         return foldMap;
     }
 
     public void avaliarQualidadeDeClassificador(KNearestNeighbor kNN) throws Exception {
+        if(K==1){
 
-        createAndPopulateFolds(kNN);
+            for(Element testElement : kNN.getDataSet()) {
+                List<Element> trainingDataset = new ArrayList<>(kNN.getDataSet());
+                trainingDataset.remove(testElement);
 
-        for(Map.Entry<Integer, List<Element>> testingFold : foldMap.entrySet()){
+                kNN.setFoldDataSet(trainingDataset);
 
-            //filling the foldDataSet based on all the folds that doesn't belong to the testfold
-            List<Element> trainingDataSet = new ArrayList<>();
-            for(Map.Entry<Integer, List<Element>> trainingFold : foldMap.entrySet()){
-                if(trainingFold.getKey() == testingFold.getKey()){
-                    continue;
-                } else {
-                    trainingDataSet.addAll(trainingFold.getValue());
-                }
-            }
-            kNN.setFoldDataSet(trainingDataSet);
-            //now we go through all the elements, comparing each one with the trainingDataSet.
-            for(Element testElement : testingFold.getValue()) {
                 String realClass = testElement.getElementClass();
-
                 kNN.classifyUnknownObject(testElement, true);
                 String calculatedClass = testElement.getElementClass();
 
@@ -81,14 +57,43 @@ public class KFold {
                     wrongGuesses++;
                 }
             }
+        } else {
+            createAndPopulateFolds(kNN);
+
+            for(Map.Entry<Integer, List<Element>> testingFold : foldMap.entrySet()){
+
+                //filling the foldDataSet based on all the folds that doesn't belong to the testfold
+                List<Element> trainingDataSet = new ArrayList<>();
+                for(Map.Entry<Integer, List<Element>> trainingFold : foldMap.entrySet()){
+                    if(trainingFold.getKey() == testingFold.getKey()){
+                        continue;
+                    } else {
+                        trainingDataSet.addAll(trainingFold.getValue());
+                    }
+                }
+                kNN.setFoldDataSet(trainingDataSet);
+                //now we go through all the elements, comparing each one with the trainingDataSet.
+                for(Element testElement : testingFold.getValue()) {
+                    String realClass = testElement.getElementClass();
+
+                    kNN.classifyUnknownObject(testElement, true);
+                    String calculatedClass = testElement.getElementClass();
+
+                    if(realClass.equals(calculatedClass)){
+                        rightGuesses++;
+                    } else {
+                        wrongGuesses++;
+                    }
+                }
+            }
         }
+
 //        printMap();
     }
 
     private void createAndPopulateFolds(KNearestNeighbor kNN){
         int elementsPerFold = (kNN.getNumberOfElements()/K);
-        //k = 4
-        //12
+
         int mod =  kNN.getNumberOfElements() % K;
         int aux = 0;
         for(int i = 1; i <= K; i++){
@@ -139,7 +144,6 @@ public class KFold {
         return "KFold{" +
                 "K=" + K +
                 ", N=" + N +
-                ", allData=" + allData +
                 ", trainingData=" + foldMap +
                 "}";
     }

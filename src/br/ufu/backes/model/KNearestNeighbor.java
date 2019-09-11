@@ -36,6 +36,7 @@ public class KNearestNeighbor {
 
     public void classifyUnknownObject(Element unkownObject, boolean useFoldDataSet){
         this.useFoldDataSet = useFoldDataSet;
+        System.out.println("Classificando: " + unkownObject.toString());
         classifyUnknownObject(unkownObject);
         this.useFoldDataSet = false;
     }
