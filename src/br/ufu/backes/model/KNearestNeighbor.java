@@ -41,7 +41,6 @@ public class KNearestNeighbor {
     }
     public void classifyUnknownObject(Element unkownObject){
         calculateAllElementsEuclideanDistanceFromUnknow(unkownObject);
-        debugDataSet();
         unkownObject.setElementClass(getMostPredominantClassOnNeighbors());
     }
 
@@ -52,10 +51,11 @@ public class KNearestNeighbor {
      * @return the prerdominant class
      */
     private String getMostPredominantClassOnNeighbors(){
-        Collections.sort(getDataSet(), Comparator.comparing(Element::getDistanceFromUnknowObject));
+        List<Element> copyOfDataset = new ArrayList<>(getDataSet());
+        Collections.sort(copyOfDataset, Comparator.comparing(Element::getDistanceFromUnknowObject));
         HashMap<String, Integer> hashMap = new HashMap<>();
         for(int i = 0; i < K; i++){//<2,2>   <3,1> //k = 4
-            Element e = getDataSet().get(i);
+            Element e = copyOfDataset.get(i);
             if(hashMap.containsKey(e.getElementClass())){
                 hashMap.put(e.getElementClass(), hashMap.get(e.getElementClass()) + 1);
             } else {

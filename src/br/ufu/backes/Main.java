@@ -28,7 +28,7 @@ public class Main {
 
 //        Classification c = new Classification("src/br/ufu/backes/resources/data.txt", 5, 15, true);
 
-        Classification c = new Classification("src/br/ufu/backes/resources/sexo.txt", 5, 2, true);
+        Classification c = new Classification("src/br/ufu/backes/resources/sexo.txt", 5, 2, false);
 
         c.avaliarQualidadeDeClassificador();
 

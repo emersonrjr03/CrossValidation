@@ -56,18 +56,20 @@ public class KFold {
 
         createAndPopulateFolds(kNN);
 
-        for(Map.Entry<Integer, List<Element>> fold : foldMap.entrySet()){
-            for(Element testElement : fold.getValue()) {
-                List<Element> foldDataSet = new ArrayList<>();
+        for(Map.Entry<Integer, List<Element>> testingFold : foldMap.entrySet()){
 
-                for(Map.Entry<Integer, List<Element>> trainingFold : foldMap.entrySet()){
-                    if(trainingFold.getKey() == fold.getKey()){
-                        continue;
-                    } else {
-                        foldDataSet.addAll(fold.getValue());
-                    }
+            //filling the foldDataSet based on all the folds that doesn't belong to the testfold
+            List<Element> trainingDataSet = new ArrayList<>();
+            for(Map.Entry<Integer, List<Element>> trainingFold : foldMap.entrySet()){
+                if(trainingFold.getKey() == testingFold.getKey()){
+                    continue;
+                } else {
+                    trainingDataSet.addAll(trainingFold.getValue());
                 }
-                kNN.setFoldDataSet(foldDataSet);
+            }
+            kNN.setFoldDataSet(trainingDataSet);
+            //now we go through all the elements, comparing each one with the trainingDataSet.
+            for(Element testElement : testingFold.getValue()) {
                 String realClass = testElement.getElementClass();
 
                 kNN.classifyUnknownObject(testElement, true);
@@ -79,7 +81,6 @@ public class KFold {
                     wrongGuesses++;
                 }
             }
-            break;
         }
 //        printMap();
     }
