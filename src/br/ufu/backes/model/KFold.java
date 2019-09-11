@@ -40,14 +40,53 @@ public class KFold {
 
     public void avaliarQualidadeDeClassificador(KNearestNeighbor kNN) throws Exception {
         if(K==1){
+            evaluateClassificatorForSingleFold(kNN);
+        } else {
+            createAndPopulateFolds(kNN);
+            evaluateClassificatorForMultiFolds(kNN);
+        }
+    }
 
-            for(Element testElement : kNN.getDataSet()) {
-                List<Element> trainingDataset = new ArrayList<>(kNN.getDataSet());
-                trainingDataset.remove(testElement);
+    /**
+     * This function is used when we have a single fold, because on that cause
+     * our dataset will be every element but the one that is being classified.
+     * @param kNN
+     */
+    private void evaluateClassificatorForSingleFold(KNearestNeighbor kNN){
+        for(Element testElement : kNN.getDataSet()) {
+            List<Element> trainingDataset = new ArrayList<>(kNN.getDataSet());
+            trainingDataset.remove(testElement);
 
-                kNN.setFoldDataSet(trainingDataset);
+            kNN.setFoldDataSet(trainingDataset);
 
+            String realClass = testElement.getElementClass();
+            kNN.classifyUnknownObject(testElement, true);
+            String calculatedClass = testElement.getElementClass();
+
+            if(realClass.equals(calculatedClass)){
+                rightGuesses++;
+            } else {
+                wrongGuesses++;
+            }
+        }
+    }
+
+    private void evaluateClassificatorForMultiFolds(KNearestNeighbor kNN){
+        for(Map.Entry<Integer, List<Element>> testingFold : foldMap.entrySet()){
+            //filling the foldDataSet based on all the folds that doesn't belong to the testfold
+            List<Element> trainingDataSet = new ArrayList<>();
+            for(Map.Entry<Integer, List<Element>> trainingFold : foldMap.entrySet()){
+                if(trainingFold.getKey() == testingFold.getKey()){
+                    continue;
+                } else {
+                    trainingDataSet.addAll(trainingFold.getValue());
+                }
+            }
+            kNN.setFoldDataSet(trainingDataSet);
+            //now we go through all the elements, comparing each one with the trainingDataSet.
+            for(Element testElement : testingFold.getValue()) {
                 String realClass = testElement.getElementClass();
+
                 kNN.classifyUnknownObject(testElement, true);
                 String calculatedClass = testElement.getElementClass();
 
@@ -57,38 +96,7 @@ public class KFold {
                     wrongGuesses++;
                 }
             }
-        } else {
-            createAndPopulateFolds(kNN);
-
-            for(Map.Entry<Integer, List<Element>> testingFold : foldMap.entrySet()){
-
-                //filling the foldDataSet based on all the folds that doesn't belong to the testfold
-                List<Element> trainingDataSet = new ArrayList<>();
-                for(Map.Entry<Integer, List<Element>> trainingFold : foldMap.entrySet()){
-                    if(trainingFold.getKey() == testingFold.getKey()){
-                        continue;
-                    } else {
-                        trainingDataSet.addAll(trainingFold.getValue());
-                    }
-                }
-                kNN.setFoldDataSet(trainingDataSet);
-                //now we go through all the elements, comparing each one with the trainingDataSet.
-                for(Element testElement : testingFold.getValue()) {
-                    String realClass = testElement.getElementClass();
-
-                    kNN.classifyUnknownObject(testElement, true);
-                    String calculatedClass = testElement.getElementClass();
-
-                    if(realClass.equals(calculatedClass)){
-                        rightGuesses++;
-                    } else {
-                        wrongGuesses++;
-                    }
-                }
-            }
         }
-
-//        printMap();
     }
 
     private void createAndPopulateFolds(KNearestNeighbor kNN){
