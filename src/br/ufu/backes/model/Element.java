@@ -21,6 +21,7 @@ public class Element {
         this.elementClass = element.getElementClass();
         this.attributes = Arrays.copyOf(element.getAttributes(), element.getAttributes().length);
         this.distanceFromUnknowObject = element.getDistanceFromUnknowObject();
+        this.Id = element.getId();
     }
 
     public Element(double... attributes){

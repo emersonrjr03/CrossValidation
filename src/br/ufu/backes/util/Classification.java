@@ -42,7 +42,7 @@ public class Classification {
         double percentRightGuesses = (kFold.getRightGuesses() * 100.0)/numberOfElements;
         double percentWrongGuesses = (kFold.getWrongGuesses() * 100.0)/numberOfElements;
         System.out.println("Correctly Classified Instances:\t\t" + kFold.getRightGuesses() + "\t" + percentRightGuesses + " %");
-        System.out.println("Incorrectly Classified Instances:\t" + kFold.getWrongGuesses() +  "\t" + percentWrongGuesses + " %");
+        System.out.println("Incorrectly Classified Instances:\t" + kFold.getWrongGuesses() +  "\t\t" + percentWrongGuesses + " %");
         System.out.println("Total Number of Instances:\t\t\t" + numberOfElements);
         System.out.println("=== Confusion Matrix ===");
 

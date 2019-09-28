@@ -45,7 +45,8 @@ public class KFold {
         if(K==1){
             evaluateClassificatorForSingleFold(kNN);
         } else {
-            createAndPopulateFolds(kNN);
+            createAndPopulateFoldsDistributively(kNN);
+            printMap();
             evaluateClassificatorForMultiFolds(kNN);
         }
     }
@@ -75,7 +76,13 @@ public class KFold {
         }
     }
 
+    /**
+     * This function is used to evaluate the given classificator when you have k > 1.
+     * @param kNN
+     */
     private void evaluateClassificatorForMultiFolds(KNearestNeighbor kNN){
+        //go through all the folds, and from each fold different than the one that we are now,
+        //we create training folds.
         for(Map.Entry<Integer, List<Element>> testingFold : foldMap.entrySet()){
             //filling the foldDataSet based on all the folds that doesn't belong to the testfold
             List<Element> trainingDataSet = new ArrayList<>();
@@ -87,6 +94,7 @@ public class KFold {
                 }
             }
             kNN.setFoldDataSet(trainingDataSet);
+
             //now we go through all the elements, comparing each one with the trainingDataSet.
             for(Element testElement : testingFold.getValue()) {
                 String realClass = testElement.getElementClass();
@@ -104,41 +112,31 @@ public class KFold {
         }
     }
 
-    private void createAndPopulateFolds(KNearestNeighbor kNN){
-        int elementsPerFold = (kNN.getNumberOfElements()/K);
-
-        int mod =  kNN.getNumberOfElements() % K;
-        int aux = 0;
-        for(int i = 1; i <= K; i++){
-            addFold(i,new ArrayList<>(kNN.getDataSet().subList(aux, aux + elementsPerFold)));
-            aux += elementsPerFold;
-        }
-
-        //distribute the remaining elements through the folds.
-        int j = 1;
-        for(int i = 0; i< mod; i++){
-
-            foldMap.get(j).add(new Element(kNN.getDataSet().get(aux + i)));
-
-            if(j == K){
-                j = 1;
+    private void createAndPopulateFoldsDistributively(KNearestNeighbor kNN){
+        int foldIndex = 1;
+        for(int i=0; i < kNN.getNumberOfElements(); i++){
+            addElementToFold(foldIndex, new Element(kNN.getDataSet().get(i)));
+            if(foldIndex == K){
+                foldIndex = 1;
             } else {
-                j++;
+                foldIndex++;
             }
         }
     }
 
-    private void addFold(int kIndex, List<Element> elements){
-        foldMap.put(kIndex, elements);
+    private void addElementToFold(int kIndex, Element element){
+        if(foldMap.get(kIndex) == null){
+            foldMap.put(kIndex, new ArrayList<>());
+        }
+        foldMap.get(kIndex).add(element);
     }
 
     private void printMap(){
         for(int i = 1; i<= K; i++){
             List<Element> foldElements = foldMap.get(i);
 
-            logInfo("Fold: " + i);
             for(Element e : foldElements){
-                logInfo(e.toString());
+                logInfo(e.toString() + " Fold: " + i);
             }
         }
 
