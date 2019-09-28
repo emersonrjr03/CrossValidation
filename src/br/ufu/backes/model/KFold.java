@@ -12,9 +12,12 @@ public class KFold {
     private Map<Integer, List<Element>> foldMap;
     private double rightGuesses;
     private double wrongGuesses;
+    private boolean debugMode;
 
-    public KFold(int K){
+    public KFold(int K, boolean debugMode){
         this.K = K;
+        this.debugMode = debugMode;
+
         foldMap = new HashMap<Integer, List<Element>>();
     }
 
@@ -66,6 +69,7 @@ public class KFold {
             if(realClass.equals(calculatedClass)){
                 rightGuesses++;
             } else {
+                logInfo("ERROR: " + testElement.toString() + "\n");
                 wrongGuesses++;
             }
         }
@@ -93,6 +97,7 @@ public class KFold {
                 if(realClass.equals(calculatedClass)){
                     rightGuesses++;
                 } else {
+                    logInfo("ERROR: " + testElement.toString() + "\n");
                     wrongGuesses++;
                 }
             }
@@ -131,9 +136,9 @@ public class KFold {
         for(int i = 1; i<= K; i++){
             List<Element> foldElements = foldMap.get(i);
 
-            System.out.println("Fold: " + i);
+            logInfo("Fold: " + i);
             for(Element e : foldElements){
-                System.out.println(e.toString());
+                logInfo(e.toString());
             }
         }
 
@@ -154,5 +159,11 @@ public class KFold {
                 ", N=" + N +
                 ", trainingData=" + foldMap +
                 "}";
+    }
+
+    private void logInfo(String msg){
+        if(debugMode){
+            System.out.println(msg);
+        }
     }
 }

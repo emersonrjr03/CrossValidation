@@ -69,6 +69,7 @@ public class Element {
 
     @Override
     public String toString() {
-        return Arrays.toString(attributes);
+        return "ID: " + getId() + " " + Arrays.toString(attributes) +
+                " Class: " + getElementClass();
     }
 }

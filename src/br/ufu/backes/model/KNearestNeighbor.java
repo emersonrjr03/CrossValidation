@@ -1,9 +1,9 @@
 package br.ufu.backes.model;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class KNearestNeighbor {
+
     // K is the number of nearest neighbors
     int K;
     boolean normalize;
@@ -16,12 +16,15 @@ public class KNearestNeighbor {
 
     private List<Element> foldDataSet;
     private boolean useFoldDataSet = false;
+    private boolean debugMode;
 
-    public KNearestNeighbor(int K, int numberOfElements, int numberOfAttribute, boolean normalize) {
+
+    public KNearestNeighbor(int K, int numberOfElements, int numberOfAttribute, boolean normalize, boolean debugMode) {
         this.K = K;
         this.numberOfElements = numberOfElements;
         this.numberOfAttributes = numberOfAttribute;
         this.normalize = normalize;
+        this.debugMode = debugMode;
     }
 
     private void calculateElementEuclideanDistanceFromUnknow(Element element, Element unknownObject){
@@ -36,7 +39,7 @@ public class KNearestNeighbor {
 
     public void classifyUnknownObject(Element unkownObject, boolean useFoldDataSet){
         this.useFoldDataSet = useFoldDataSet;
-        System.out.println("Classificando: " + unkownObject.toString());
+        logInfo("Classificando: " + unkownObject.toString());
         classifyUnknownObject(unkownObject);
         this.useFoldDataSet = false;
     }
@@ -54,6 +57,12 @@ public class KNearestNeighbor {
     private String getMostPredominantClassOnNeighbors(){
         List<Element> copyOfDataset = new ArrayList<>(getDataSet());
         Collections.sort(copyOfDataset, Comparator.comparing(Element::getDistanceFromUnknowObject));
+
+        return getMostAppearing(copyOfDataset, K);
+
+    }
+
+    private String getMostAppearing(List<Element> copyOfDataset, int K) {
         HashMap<String, Integer> hashMap = new HashMap<>();
         for(int i = 0; i < K; i++){//<2,2>   <3,1> //k = 4
             Element e = copyOfDataset.get(i);
@@ -66,23 +75,31 @@ public class KNearestNeighbor {
 
         debugDataSet();
 
-        Integer max = 0;
+        Integer maior = 0;
+        Integer segundoMaior = 0;
         String mostAppearingClass = "";
 
         for(Map.Entry<String, Integer> entry : hashMap.entrySet()){
-            if (entry.getValue() > max) {
-                max = entry.getValue();
+            if (entry.getValue() >= maior) {
+                segundoMaior = maior;
+                maior = entry.getValue();
                 mostAppearingClass = entry.getKey();
             }
         }
+
+        if(maior.equals(segundoMaior) && K > 1){
+            logInfo("Diminuido K pra " + (K-1));
+            return getMostAppearing(copyOfDataset, K-1);
+        }
+
 
         return mostAppearingClass;
     }
 
     private void debugDataSet() {
-        System.out.println("ID  DISTANCIA   CLASSE");
+        logInfo("ID  DISTANCIA   CLASSE");
         for(Element e : getDataSet()){
-            System.out.println(e.getId() + "    " + e.getDistanceFromUnknowObject() + "  " + e.getElementClass());
+            logInfo(e.getId() + "    " + e.getDistanceFromUnknowObject() + "  " + e.getElementClass());
         }
     }
 
@@ -156,5 +173,11 @@ public class KNearestNeighbor {
 
     public void setFoldDataSet(List<Element> foldDataSet) {
         this.foldDataSet = foldDataSet;
+    }
+
+    private void logInfo(String msg){
+        if(debugMode){
+            System.out.println(msg);
+        }
     }
 }
