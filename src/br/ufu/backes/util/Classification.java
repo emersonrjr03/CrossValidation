@@ -18,13 +18,16 @@ public class Classification {
     private KNearestNeighbor kNN;
     private int numberOfElements;
     private int numberOfAttributes;
+    private boolean debugMode;
 
-    public Classification(String filePath, int numberOfNeighbors, int folds, boolean normalize){
+    public Classification(String filePath, int numberOfNeighbors, int folds, boolean normalize, boolean debugMode){
+        this.debugMode = debugMode;
+
         fillDataSetAndParamsFromFile(filePath);
-        kNN = new KNearestNeighbor(numberOfNeighbors, numberOfElements, numberOfAttributes, normalize);
+        kNN = new KNearestNeighbor(numberOfNeighbors, numberOfElements, numberOfAttributes, normalize, debugMode);
         kNN.setDataSetAndNormalize(dataSet, normalize);
 
-        kFold = new KFold(folds);
+        kFold = new KFold(folds, debugMode);
     }
 
     public Element classifyObject(double... attributes){
@@ -36,8 +39,13 @@ public class Classification {
 
     public void avaliarQualidadeDeClassificador() throws Exception {
         kFold.avaliarQualidadeDeClassificador(kNN);
-        System.out.println("Acertos: " + kFold.getRightGuesses());
-        System.out.println("Erros: " + kFold.getWrongGuesses());
+        double percentRightGuesses = (kFold.getRightGuesses() * 100.0)/numberOfElements;
+        double percentWrongGuesses = (kFold.getWrongGuesses() * 100.0)/numberOfElements;
+        System.out.println("Correctly Classified Instances:\t\t" + kFold.getRightGuesses() + "\t" + percentRightGuesses + " %");
+        System.out.println("Incorrectly Classified Instances:\t" + kFold.getWrongGuesses() +  "\t" + percentWrongGuesses + " %");
+        System.out.println("Total Number of Instances:\t\t\t" + numberOfElements);
+        System.out.println("=== Confusion Matrix ===");
+
 
     }
 
